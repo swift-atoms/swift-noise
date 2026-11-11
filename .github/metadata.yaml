@@ -1,0 +1,9 @@
+description: "Seeded gradient noise for Swift in one to four dimensions, bit-identical on every platform."
+topics:
+  - primitives
+  - noise
+  - random
+  - geometry
+homepage: "https://swift-institute.org"
+readme:
+  family: E
