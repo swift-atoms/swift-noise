@@ -183,5 +183,24 @@ extension `Noise Tests` {
             requireSendable(noise)
             #expect(Set([noise, noise, Noise<4, Float>(seed: .init(1, 2))]).count == 2)
         }
+
+        @Test
+        func `A value read through a cache is the value read without one, bit for bit, across cells and seeds`() {
+            let first = Noise<3, Double>(seed: seed)
+            let second = Noise<3, Double>(seed: .init(2026, 12))
+            var cache = Noise<3, Double>.Cache()
+            var step = 0
+            while step < 400 {
+                let point = Point<3, Double>(x: Double(step) * 0.0731 - 7, y: Double(step % 37) * 0.19, z: 0.25)
+                let noise = step.isMultiple(of: 3) ? second : first
+                #expect(noise.value(at: point, cache: &cache).bitPattern == noise.value(at: point).bitPattern)
+                step += 1
+            }
+            var plane = Noise<2, Float>.Cache()
+            let flat = Noise<2, Float>(seed: seed)
+            #expect(flat.value(at: Point(x: 0.3, y: 1.7), cache: &plane) == flat.value(at: Point(x: 0.3, y: 1.7)))
+            #expect(flat.value(at: Point(x: 0.4, y: 1.2), cache: &plane) == flat.value(at: Point(x: 0.4, y: 1.2)))
+            #expect(flat.value(at: Point(x: .nan, y: 1.2), cache: &plane).isNaN)
+        }
     }
 }
