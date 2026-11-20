@@ -12,6 +12,22 @@ extension Noise: Sendable {}
 extension Noise where N == 1 {
     @inlinable
     public init(seed: Threefry.Key) { self.init(dimensioned: seed) }
+
+    /// Evaluates 1D gradient noise at `coordinate`.
+    @inlinable
+    public func value(at coordinate: Scalar) -> Scalar {
+        value(at: Point<1, Scalar>([coordinate]))
+    }
+
+    /// A weighted three-octave sum (fractional Brownian motion) at `coordinate`.
+    @inlinable
+    public func wave(at coordinate: Scalar) -> Scalar {
+        let second = Noise<1, Scalar>(seed: Threefry.Key(seed.first &+ 7, seed.second))
+        let third = Noise<1, Scalar>(seed: Threefry.Key(seed.first &+ 13, seed.second))
+        return 0.62 * value(at: coordinate)
+            + 0.28 * second.value(at: coordinate * 2.3 + 11.1)
+            + 0.10 * third.value(at: coordinate * 5.1 + 3.3)
+    }
 }
 
 extension Noise where N == 2 {
