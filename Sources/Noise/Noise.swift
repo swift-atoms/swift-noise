@@ -56,10 +56,10 @@ extension Noise {
     @inlinable
     public func value(at point: Point<N, Scalar>, cache: inout Cache) -> Scalar {
         let coordinates = point.coordinates
-        let floors = coordinates.map { $0.rounded(.down) }
-        let fraction = coordinates - floors
-        let cell = floors.map(Self.wrapped)
-        let fade = fraction.map { $0 * $0 * $0 * ($0 * ($0 * 6 - 15) + 10) }
+        let floors: Vector<N, Scalar> = coordinates.map { $0.rounded(.down) }
+        let fraction: Vector<N, Scalar> = coordinates - floors
+        let cell: Vector<N, UInt32> = floors.map(Self.wrapped)
+        let fade: Vector<N, Scalar> = fraction.map { $0 * $0 * $0 * ($0 * ($0 * 6 - 15) + 10) }
         if !cache.holds(cell, of: seed) {
             cache.fill(cell, of: seed, (0..<(1 << N)).map { corner in gradient(at: Self.corner(corner, of: cell)) })
         }
