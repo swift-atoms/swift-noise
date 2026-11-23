@@ -33,11 +33,16 @@ extension Noise.Cache {
         return true
     }
 
-    /// The cache holding a cell's gradients, in the order of its corners.
+    /// The cache holding a cell's gradients, in the order of its corners, written over the last cell's in place.
     @inlinable
-    internal mutating func fill(_ cell: Vector<N, UInt32>, of seed: Threefry.Key, _ gradients: [Vector<N, Scalar>]) {
+    internal mutating func fill(_ cell: Vector<N, UInt32>, of seed: Threefry.Key, _ gradient: (Int) -> Vector<N, Scalar>) {
         self.seed = seed
         self.cell = cell
-        self.gradients = gradients
+        gradients.removeAll(keepingCapacity: true)
+        var corner = 0
+        while corner < 1 << N {
+            gradients.append(gradient(corner))
+            corner += 1
+        }
     }
 }
