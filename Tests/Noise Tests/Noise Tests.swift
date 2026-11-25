@@ -228,3 +228,33 @@ extension `Noise Tests` {
         }
     }
 }
+
+extension `Noise Tests` {
+    @Suite
+    struct `Noise grain` {
+        @Test
+        func `Known shares are bit-identical for a seed and a point`() {
+            let grain = Noise<2, Double>.Grain(seed: Threefry.Key(3, 9))
+            #expect(grain.share(at: Point(x: 0.125, y: 0.125)).bitPattern == 13_819_737_663_767_960_468)
+            #expect(grain.share(at: Point(x: 3.375, y: -1.8125)).bitPattern == 13_823_245_104_484_283_540)
+            #expect(grain.share(at: Point(x: -25.25, y: 14.325)).bitPattern == 4_596_420_736_674_907_984)
+        }
+
+        @Test
+        func `A share lies within −1 and 1, is one all over a cell, and is 0 where no cell is`() {
+            let flat = Noise<2, Float>.Grain(seed: Threefry.Key(3, 9))
+            let solid = Noise<4, Double>.Grain(seed: Threefry.Key(3, 9))
+            for step in 0..<300 {
+                let place = Float(step % 17) - 8
+                let share = flat.share(at: Point(x: place, y: Float(step)))
+                #expect(abs(share) <= 1)
+                #expect(flat.share(at: Point(x: place + 0.9, y: Float(step) + 0.5)) == share)
+                #expect(flat.share(at: Point(x: place + 1, y: Float(step))) != share)
+                let deep = Double(step)
+                #expect(solid.share(at: Point([0, 0, 0, deep])) != solid.share(at: Point([0, 0, 0, deep + 1])))
+            }
+            #expect(flat.share(at: Point(x: .nan, y: 0)) == 0)
+            #expect(flat.share(at: Point(x: 0, y: 0x1p62)) == 0)
+        }
+    }
+}
