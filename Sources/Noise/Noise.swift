@@ -93,14 +93,27 @@ extension Noise {
 
     @inlinable
     public func value(at point: Point<N, Scalar>, cache: inout Cache) -> Scalar {
+        value(at: point) { cell, corner in
+            if corner == 0, !cache.holds(cell, of: seed) {
+                cache.fill(cell, of: seed) { corner in gradient(at: Self.corner(corner, of: cell)) }
+            }
+            return cache.gradients[corner]
+        }
+    }
+
+    /// The field's value at a point, from the gradients `gradient` gives for a cell's corners, which are asked for in
+    /// order, the first one first.
+    @inlinable
+    @inline(__always)
+    public func value(
+        at point: Point<N, Scalar>,
+        gradient: (_ cell: Vector<N, UInt32>, _ corner: Int) -> Vector<N, Scalar>
+    ) -> Scalar {
         let coordinates = point.coordinates
         let floors: Vector<N, Scalar> = coordinates.map { $0.rounded(.down) }
         let fraction: Vector<N, Scalar> = coordinates - floors
         let cell: Vector<N, UInt32> = floors.map(Self.wrapped)
         let fade: Vector<N, Scalar> = fraction.map { $0 * $0 * $0 * ($0 * ($0 * 6 - 15) + 10) }
-        if !cache.holds(cell, of: seed) {
-            cache.fill(cell, of: seed) { corner in gradient(at: Self.corner(corner, of: cell)) }
-        }
         var total: Scalar = 0
         var corner = 0
         while corner < 1 << N {
@@ -116,7 +129,7 @@ extension Noise {
                 }
                 axis += 1
             }
-            total += weight * cache.gradients[corner].dot(offset)
+            total += weight * gradient(cell, corner).dot(offset)
             corner += 1
         }
         let scaled = total * 2 / Scalar(N).squareRoot()
@@ -125,7 +138,7 @@ extension Noise {
 
     /// The lattice point of a cell's corner: one higher along each axis whose bit is set in `corner`.
     @inlinable
-    internal static func corner(_ corner: Int, of cell: Vector<N, UInt32>) -> Vector<N, UInt32> {
+    public static func corner(_ corner: Int, of cell: Vector<N, UInt32>) -> Vector<N, UInt32> {
         var lattice = cell
         (0..<N).forEach { axis in
             if (corner >> axis) & 1 == 1 { lattice[axis] = cell[axis] &+ 1 }
