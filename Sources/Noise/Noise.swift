@@ -180,7 +180,7 @@ extension Noise {
         let near = Scalar(4_611_686_018_427_387_904 as UInt64)
         if floor > -near, floor < near { return UInt32(truncatingIfNeeded: whole(floor)) }
         let period = Scalar(4_294_967_296 as UInt64)
-        return UInt32(truncatingIfNeeded: Int64(floor.truncatingRemainder(dividingBy: period)))
+        return UInt32(truncatingIfNeeded: whole(floor.truncatingRemainder(dividingBy: period)))
     }
 
     /// A whole value below 2^63 in magnitude as an integer. The standard library converts a `Float` or a `Double` in
