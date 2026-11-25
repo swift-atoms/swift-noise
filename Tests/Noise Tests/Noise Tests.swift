@@ -217,7 +217,8 @@ extension `Noise Tests` {
                 var wave = Noise<1, Double>.Wave(noise)
                 let coordinates = (0..<600).map { Double($0) * 0.037 - 4 } + [3.2, -1e9, 0, -0.0, .nan, .infinity, 1.5]
                 for coordinate in coordinates {
-                    let plain = 0.62 * noise.value(at: coordinate)
+                    let plain =
+                        0.62 * noise.value(at: coordinate)
                         + 0.28 * second.value(at: coordinate * 2.3 + 11.1)
                         + 0.10 * third.value(at: coordinate * 5.1 + 3.3)
                     let kept = wave.value(at: coordinate)
