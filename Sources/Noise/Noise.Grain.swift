@@ -55,8 +55,8 @@ extension Noise.Grain {
         var block = Threefry.Block(0, 0)
         var axis = 0
         while axis < N {
-            let first = UInt64(bitPattern: Int64(corner[axis]))
-            let second = axis + 1 < N ? UInt64(bitPattern: Int64(corner[axis + 1])) : 0
+            let first = UInt64(bitPattern: Noise.whole(corner[axis]))
+            let second = axis + 1 < N ? UInt64(bitPattern: Noise.whole(corner[axis + 1])) : 0
             block = Threefry.block(key: key, counter: Threefry.Block(first, second))
             key = Threefry.Key(block.first, block.second)
             axis += 2

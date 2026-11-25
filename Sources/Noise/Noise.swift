@@ -165,8 +165,17 @@ extension Noise {
     static func wrapped(_ floor: Scalar) -> UInt32 {
         guard floor.isFinite else { return 0 }
         let near = Scalar(4_611_686_018_427_387_904 as UInt64)
-        if floor > -near, floor < near { return UInt32(truncatingIfNeeded: Int64(floor)) }
+        if floor > -near, floor < near { return UInt32(truncatingIfNeeded: whole(floor)) }
         let period = Scalar(4_294_967_296 as UInt64)
         return UInt32(truncatingIfNeeded: Int64(floor.truncatingRemainder(dividingBy: period)))
+    }
+
+    /// A whole value below 2^63 in magnitude as an integer. The standard library converts a `Float` or a `Double` in
+    /// one instruction where the type is written, and bit by bit where it is a type parameter.
+    @inlinable
+    static func whole(_ value: Scalar) -> Int64 {
+        if Scalar.self == Float.self { return Int64(unsafe unsafeBitCast(value, to: Float.self)) }
+        if Scalar.self == Double.self { return Int64(unsafe unsafeBitCast(value, to: Double.self)) }
+        return Int64(value)
     }
 }
