@@ -117,19 +117,22 @@ extension Noise {
         var total: Scalar = 0
         var corner = 0
         while corner < 1 << N {
-            var offset = fraction
+            let gradient = gradient(cell, corner)
+            // The gradient's dot product with the offset from the corner, summed in the order of the axes.
+            var product: Scalar = 0
             var weight: Scalar = 1
             var axis = 0
             while axis < N {
                 if (corner >> axis) & 1 == 1 {
-                    offset[axis] = fraction[axis] - 1
+                    product += gradient[axis] * (fraction[axis] - 1)
                     weight *= fade[axis]
                 } else {
+                    product += gradient[axis] * fraction[axis]
                     weight *= 1 - fade[axis]
                 }
                 axis += 1
             }
-            total += weight * gradient(cell, corner).dot(offset)
+            total += weight * product
             corner += 1
         }
         let scaled = total * 2 / Scalar(N).squareRoot()
