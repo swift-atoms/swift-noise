@@ -245,7 +245,7 @@ extension `Noise Tests` {
         func `A share lies within −1 and 1, is one all over a cell, and is 0 where no cell is`() {
             let flat = Noise<2, Float>.Grain(seed: Threefry.Key(3, 9))
             let solid = Noise<4, Double>.Grain(seed: Threefry.Key(3, 9))
-            for step in 0..<300 {
+            (0..<300).forEach { step in
                 let place = Float(step % 17) - 8
                 let share = flat.share(at: Point(x: place, y: Float(step)))
                 #expect(abs(share) <= 1)
